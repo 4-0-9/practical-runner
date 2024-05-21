@@ -3,8 +3,6 @@ pub const PADDING: u16 = 8;
 pub const LINE_SPACING: u16 = 2;
 pub const FONT_POINT_SIZE: u16 = 16;
 
-pub const FONT_NAME: &str = "GeistMono Nerd Font";
-
 pub const FONT_COLOR: &str = "#cdd6f4";
 pub const FONT_COLOR_SELECTED: &str = "#1e1e2e";
 
