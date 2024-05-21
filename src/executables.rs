@@ -5,11 +5,21 @@ pub fn get_executables() -> Result<Vec<String>, Box<dyn Error>> {
 
     get_files(Path::new("/usr/local"), &mut executables)?;
     get_files(Path::new("/bin"), &mut executables)?;
+    match home::cargo_home() {
+        Ok(cargo_home) => {
+            get_files(&cargo_home.join("bin"), &mut executables)?;
+        }
+        Err(_) => (),
+    }
 
     Ok(executables)
 }
 
 pub fn get_files(path: &Path, files: &mut Vec<String>) -> Result<(), Box<dyn Error>> {
+    if !path.exists() {
+        return Ok(());
+    }
+
     let dirs = fs::read_dir(path)?;
 
     for e in dirs {
