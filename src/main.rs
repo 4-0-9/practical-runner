@@ -5,13 +5,14 @@ use std::{
 
 #[allow(unused_imports)]
 use clap::Parser;
+use config::RunnerMenuColors;
 use executables::get_executables;
 use runner::Runner;
 
 mod arguments;
+mod config;
 mod executables;
 mod runner;
-mod config;
 mod utils;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -19,7 +20,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let executables = get_executables()?;
 
-    let mut runner = Runner::new(args.prompt, executables);
+    let mut runner = Runner::new(
+        args.prompt,
+        executables,
+        RunnerMenuColors {
+            font_color: args.font_color,
+            font_color_active: args.font_color_active,
+            background_color: args.background_color,
+            background_color_active: args.background_color_active,
+        },
+    );
 
     if let Some(program) = runner.run() {
         run_program(program);

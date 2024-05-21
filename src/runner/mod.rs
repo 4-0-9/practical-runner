@@ -1,4 +1,4 @@
-use std::{ops::Add, time::Duration};
+use std::time::Duration;
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use sdl2::{
@@ -12,10 +12,7 @@ use sdl2::{
 };
 
 use crate::{
-    config::{
-        BACKGROUND_COLOR, BACKGROUND_COLOR_SELECTED, FONT_COLOR, FONT_COLOR_SELECTED,
-        FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING,
-    },
+    config::{RunnerMenuColors, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING},
     utils::color_from_hex,
 };
 
@@ -27,10 +24,11 @@ pub struct Runner {
     ttf: ttf::Sdl2TtfContext,
     input: String,
     window_size: (u32, u32),
+    colors: RunnerMenuColors,
 }
 
 impl Runner {
-    pub fn new(prompt: String, executables: Vec<String>) -> Self {
+    pub fn new(prompt: String, executables: Vec<String>, colors: RunnerMenuColors) -> Self {
         let context = sdl2::init().expect("Error creating SDL context");
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
@@ -75,6 +73,7 @@ impl Runner {
             input: String::from(""),
             ttf,
             window_size,
+            colors,
         }
     }
 
@@ -84,8 +83,10 @@ impl Runner {
         let mut selection_index: u16 = 0;
         let mut filtered_executables = self.executables.clone();
 
-        let background_color = color_from_hex(BACKGROUND_COLOR).unwrap();
-        let background_color_selected = color_from_hex(BACKGROUND_COLOR_SELECTED).unwrap();
+        let background_color = color_from_hex(&self.colors.background_color).unwrap();
+        let background_color_active = color_from_hex(&self.colors.background_color_active).unwrap();
+        let font_color = color_from_hex(&self.colors.font_color).unwrap();
+        let font_color_active = color_from_hex(&self.colors.font_color_active).unwrap();
 
         let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
 
@@ -93,10 +94,6 @@ impl Runner {
             .ttf
             .load_font(font_path.clone(), FONT_POINT_SIZE)
             .expect(&format!("Error loading font {}", font_path));
-
-        let font_color = color_from_hex(FONT_COLOR).expect("Error loading FONT_COLOR");
-        let font_color_selected =
-            color_from_hex(FONT_COLOR_SELECTED).expect("Error loading FONT_COLOR_SELECTED");
 
         let creator = self.canvas.texture_creator();
 
@@ -228,7 +225,7 @@ impl Runner {
                     .blended(if i != selection_index {
                         font_color
                     } else {
-                        font_color_selected
+                        font_color_active
                     })
                     .expect("Error rendering text");
 
@@ -245,7 +242,7 @@ impl Runner {
                 self.canvas.set_draw_color(if i != selection_index {
                     background_color
                 } else {
-                    background_color_selected
+                    background_color_active
                 });
 
                 let _ = self.canvas.fill_rect(background_rect);
