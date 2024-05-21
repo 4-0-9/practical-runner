@@ -43,7 +43,7 @@ impl Runner {
                 .expect(&format!("Error loading font {}", font_path));
 
             window_height = (PADDING
-                + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows)))
+                + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows)) - settings.line_spacing + PADDING)
                 .into();
         }
 
