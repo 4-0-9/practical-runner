@@ -191,7 +191,7 @@ impl Runner {
 
                 let rect = Rect::new(
                     PADDING.into(),
-                    PADDING.into(),
+                    (PADDING - 3).into(),
                     surface.width(),
                     surface.height(),
                 );
