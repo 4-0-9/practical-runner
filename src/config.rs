@@ -1,4 +1,4 @@
-pub const MAX_ITEM_DISPLAY_COUNT: u16 = 10;
+pub const MAX_ITEM_DISPLAY_COUNT: u16 = 9;
 pub const PADDING: u16 = 8;
 pub const LINE_SPACING: u16 = 2;
 pub const FONT_POINT_SIZE: u16 = 16;

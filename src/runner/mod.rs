@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{ops::Add, time::Duration};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use sdl2::{
@@ -183,6 +183,7 @@ impl Runner {
                             &mut filtered_executables,
                             &matcher,
                         );
+
                         selection_index = 0;
                     }
                     _ => {}
@@ -209,9 +210,18 @@ impl Runner {
                 let _ = self.canvas.copy(&texture, None, Some(rect));
             }
 
-            let item_count = MAX_ITEM_DISPLAY_COUNT.min(filtered_executables.len() as u16);
-            for i in 0..item_count {
-                let offset = PADDING + (font.height() as u16 + LINE_SPACING) * (i + 1);
+            // try to keep the selection centered
+            let executables_len: u16 = filtered_executables.len() as u16;
+            let start: u16 = selection_index
+                .saturating_sub(MAX_ITEM_DISPLAY_COUNT.div_euclid(2))
+                .min(executables_len.saturating_sub(MAX_ITEM_DISPLAY_COUNT));
+            let end: u16 = (start + MAX_ITEM_DISPLAY_COUNT).min(executables_len);
+            // ---
+
+            let mut display_count: u16 = 0;
+
+            for i in start..end {
+                let offset = PADDING + (font.height() as u16 + LINE_SPACING) * (display_count + 1);
 
                 let surface = font
                     .render(&filtered_executables[i as usize])
@@ -245,6 +255,8 @@ impl Runner {
                     .expect("Error creating texture");
 
                 let _ = self.canvas.copy(&texture, None, Some(rect));
+
+                display_count += 1;
             }
 
             self.canvas.present();
