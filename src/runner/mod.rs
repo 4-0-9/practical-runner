@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use sdl2::{
     event::Event,
     keyboard::Keycode,
@@ -12,22 +13,24 @@ use sdl2::{
 
 use crate::{
     config::{
-        BACKGROUND_COLOR, FONT_COLOR, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT,
-        PADDING,
+        BACKGROUND_COLOR, BACKGROUND_COLOR_SELECTED, FONT_COLOR, FONT_COLOR_SELECTED,
+        FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING,
     },
     utils::color_from_hex,
 };
 
 pub struct Runner {
+    prompt: String,
     executables: Vec<String>,
     context: Sdl,
     canvas: Canvas<Window>,
     ttf: ttf::Sdl2TtfContext,
     input: String,
+    window_size: (u32, u32),
 }
 
 impl Runner {
-    pub fn new(executables: Vec<String>) -> Self {
+    pub fn new(prompt: String, executables: Vec<String>) -> Self {
         let context = sdl2::init().expect("Error creating SDL context");
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
@@ -55,6 +58,7 @@ impl Runner {
             .expect("Error creating window");
 
         window.set_opacity(0.0).unwrap();
+        let window_size = window.size();
 
         let canvas = window.into_canvas().build().expect("Error creating canvas");
 
@@ -62,19 +66,24 @@ impl Runner {
         cloned_executables.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
 
         Self {
+            prompt,
             executables: cloned_executables,
             context,
             canvas,
             input: String::from(""),
             ttf,
+            window_size,
         }
     }
 
     pub fn run(&mut self) -> Option<String> {
+        let matcher = SkimMatcherV2::default();
+
+        let mut selection_index: u16 = 0;
         let mut filtered_executables = self.executables.clone();
 
-        self.canvas
-            .set_draw_color(color_from_hex(BACKGROUND_COLOR).unwrap());
+        let background_color = color_from_hex(BACKGROUND_COLOR).unwrap();
+        let background_color_selected = color_from_hex(BACKGROUND_COLOR_SELECTED).unwrap();
 
         let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
 
@@ -83,11 +92,16 @@ impl Runner {
             .load_font(font_path.clone(), FONT_POINT_SIZE)
             .expect(&format!("Error loading font {}", font_path));
 
+        let font_color = color_from_hex(FONT_COLOR).expect("Error loading FONT_COLOR");
+        let font_color_selected =
+            color_from_hex(FONT_COLOR_SELECTED).expect("Error loading FONT_COLOR_SELECTED");
+
         let creator = self.canvas.texture_creator();
 
         let mut event_pump = self.context.event_pump().unwrap();
 
-        'running: loop {
+        'run: loop {
+            self.canvas.set_draw_color(background_color);
             self.canvas.clear();
 
             for event in event_pump.poll_iter() {
@@ -98,7 +112,7 @@ impl Runner {
                         ..
                     } => {
                         self.input = String::from("");
-                        break 'running;
+                        break 'run;
                     }
                     Event::KeyDown { keycode, .. } => {
                         if let Some(key) = keycode {
@@ -111,15 +125,44 @@ impl Runner {
                                             &self.input,
                                             &self.executables,
                                             &mut filtered_executables,
+                                            &matcher,
                                         );
+                                        selection_index = 0;
                                     }
                                 }
                                 Keycode::Return => {
                                     // TODO: Improve this
-                                    if filtered_executables.len() > 0 {
-                                        self.input = filtered_executables[0].clone();
+                                    let executables_len = filtered_executables.len();
+                                    if executables_len > 0 {
+                                        self.input = filtered_executables
+                                            [executables_len.min(selection_index.into()) as usize]
+                                            .clone();
                                     }
-                                    break 'running;
+                                    break 'run;
+                                }
+                                Keycode::Down => {
+                                    if selection_index < (filtered_executables.len() - 1) as u16 {
+                                        selection_index += 1;
+                                    }
+                                }
+                                Keycode::Up => {
+                                    if selection_index > 0 {
+                                        selection_index -= 1;
+                                    }
+                                }
+                                Keycode::Tab => {
+                                    if filtered_executables.len() > 0 {
+                                        self.input =
+                                            filtered_executables[selection_index as usize].clone();
+
+                                        filter_executables(
+                                            &self.input,
+                                            &self.executables,
+                                            &mut filtered_executables,
+                                            &matcher,
+                                        );
+                                        selection_index = 0;
+                                    }
                                 }
                                 _ => (),
                             }
@@ -132,17 +175,17 @@ impl Runner {
                             &self.input,
                             &self.executables,
                             &mut filtered_executables,
+                            &matcher,
                         );
+                        selection_index = 0;
                     }
                     _ => {}
                 }
             }
 
-            let font_color = color_from_hex(FONT_COLOR).expect("Error loading FONT_COLOR");
-
-            if !self.input.is_empty() {
+            if !self.input.is_empty() || !self.prompt.is_empty() {
                 let surface = font
-                    .render(&self.input)
+                    .render(&format!("{}{}", &self.prompt, &self.input))
                     .blended(font_color)
                     .expect("Error rendering text");
 
@@ -166,7 +209,11 @@ impl Runner {
 
                 let surface = font
                     .render(&filtered_executables[i as usize])
-                    .blended(font_color)
+                    .blended(if i != selection_index {
+                        font_color
+                    } else {
+                        font_color_selected
+                    })
                     .expect("Error rendering text");
 
                 let rect = Rect::new(
@@ -175,6 +222,17 @@ impl Runner {
                     surface.width(),
                     surface.height(),
                 );
+
+                let background_rect =
+                    Rect::new(0, offset.into(), self.window_size.0, surface.height());
+
+                self.canvas.set_draw_color(if i != selection_index {
+                    background_color
+                } else {
+                    background_color_selected
+                });
+
+                let _ = self.canvas.fill_rect(background_rect);
 
                 let texture = creator
                     .create_texture_from_surface(surface)
@@ -200,10 +258,13 @@ fn filter_executables(
     input: &String,
     executables: &Vec<String>,
     filtered_executables: &mut Vec<String>,
+    matcher: &SkimMatcherV2,
 ) {
     *filtered_executables = executables
         .iter()
-        .filter(|e| (*e).starts_with(input))
+        .filter(|e| matcher.fuzzy_indices(*e, input).is_some())
         .map(|e| e.to_string())
         .collect();
+
+    filtered_executables.sort_by(|a, b| b.starts_with(input).cmp(&a.starts_with(input)));
 }

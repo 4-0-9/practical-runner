@@ -15,11 +15,11 @@ mod config;
 mod utils;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // let args = arguments::Arguments::parse();
+    let args = arguments::Arguments::parse();
 
     let executables = get_executables()?;
 
-    let mut runner = Runner::new(executables);
+    let mut runner = Runner::new(args.prompt, executables);
 
     if let Some(program) = runner.run() {
         run_program(program);
