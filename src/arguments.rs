@@ -2,7 +2,7 @@ use clap::Parser;
 
 use crate::config::{
     BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, FONT_COLOR, FONT_COLOR_ACTIVE, FONT_POINT_SIZE,
-    MAX_ITEM_DISPLAY_COUNT,
+    LINE_SPACING, MAX_ITEM_DISPLAY_COUNT,
 };
 
 #[derive(Parser, Debug)]
@@ -28,4 +28,7 @@ pub struct Arguments {
 
     #[arg(long, help = "The menu's font size", default_value_t = FONT_POINT_SIZE)]
     pub font_size: u16,
+
+    #[arg(long, help = "The spacing between items", default_value_t = LINE_SPACING)]
+    pub line_spacing: u16,
 }

@@ -30,6 +30,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             background_color_active: args.background_color_active,
             rows: args.rows,
             font_size: args.font_size,
+            line_spacing: args.line_spacing,
         },
     );
 

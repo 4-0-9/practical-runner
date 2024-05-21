@@ -12,7 +12,7 @@ use sdl2::{
 };
 
 use crate::{
-    config::{RunnerMenuSettings, LINE_SPACING, PADDING},
+    config::{RunnerMenuSettings, PADDING},
     utils::color_from_hex,
 };
 
@@ -42,8 +42,9 @@ impl Runner {
                 .load_font(font_path.clone(), settings.font_size)
                 .expect(&format!("Error loading font {}", font_path));
 
-            window_height =
-                (PADDING + ((font.height() as u16 + LINE_SPACING) * (1 + settings.rows))).into();
+            window_height = (PADDING
+                + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows)))
+                .into();
         }
 
         let video = context.video().expect("Error initializing SDL video");
@@ -218,7 +219,8 @@ impl Runner {
             let mut display_count: u16 = 0;
 
             for i in start..end {
-                let offset = PADDING + (font.height() as u16 + LINE_SPACING) * (display_count + 1);
+                let offset = PADDING
+                    + (font.height() as u16 + self.settings.line_spacing) * (display_count + 1);
 
                 let surface = font
                     .render(&filtered_executables[i as usize])

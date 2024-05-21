@@ -16,4 +16,5 @@ pub struct RunnerMenuSettings {
     pub background_color_active: String,
     pub rows: u16,
     pub font_size: u16,
+    pub line_spacing: u16,
 }
