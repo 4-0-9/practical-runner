@@ -9,9 +9,10 @@ pub const FONT_COLOR_ACTIVE: &str = "#1e1e2e";
 pub const BACKGROUND_COLOR: &str = "#1e1e2e";
 pub const BACKGROUND_COLOR_ACTIVE: &str = "#89b4fa";
 
-pub struct RunnerMenuColors {
+pub struct RunnerMenuSettings {
     pub font_color: String,
     pub font_color_active: String,
     pub background_color: String,
     pub background_color_active: String,
+    pub rows: u16,
 }

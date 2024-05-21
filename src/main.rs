@@ -5,7 +5,7 @@ use std::{
 
 #[allow(unused_imports)]
 use clap::Parser;
-use config::RunnerMenuColors;
+use config::RunnerMenuSettings;
 use executables::get_executables;
 use runner::Runner;
 
@@ -23,11 +23,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut runner = Runner::new(
         args.prompt,
         executables,
-        RunnerMenuColors {
+        RunnerMenuSettings {
             font_color: args.font_color,
             font_color_active: args.font_color_active,
             background_color: args.background_color,
             background_color_active: args.background_color_active,
+            rows: args.rows,
         },
     );
 

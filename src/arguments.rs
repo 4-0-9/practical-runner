@@ -1,6 +1,9 @@
 use clap::Parser;
 
-use crate::config::{FONT_COLOR, FONT_COLOR_ACTIVE, BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE};
+use crate::config::{
+    BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, FONT_COLOR, FONT_COLOR_ACTIVE,
+    MAX_ITEM_DISPLAY_COUNT,
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -19,4 +22,7 @@ pub struct Arguments {
 
     #[arg(long, help = "The background color of the active item", default_value_t = String::from(BACKGROUND_COLOR_ACTIVE))]
     pub background_color_active: String,
+
+    #[arg(short, long, help = "The amount of items to display at once", default_value_t = MAX_ITEM_DISPLAY_COUNT)]
+    pub rows: u16,
 }

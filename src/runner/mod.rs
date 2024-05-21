@@ -12,7 +12,7 @@ use sdl2::{
 };
 
 use crate::{
-    config::{RunnerMenuColors, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING},
+    config::{RunnerMenuSettings, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING},
     utils::color_from_hex,
 };
 
@@ -24,11 +24,11 @@ pub struct Runner {
     ttf: ttf::Sdl2TtfContext,
     input: String,
     window_size: (u32, u32),
-    colors: RunnerMenuColors,
+    settings: RunnerMenuSettings,
 }
 
 impl Runner {
-    pub fn new(prompt: String, executables: Vec<String>, colors: RunnerMenuColors) -> Self {
+    pub fn new(prompt: String, executables: Vec<String>, colors: RunnerMenuSettings) -> Self {
         let context = sdl2::init().expect("Error creating SDL context");
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
@@ -73,7 +73,7 @@ impl Runner {
             input: String::from(""),
             ttf,
             window_size,
-            colors,
+            settings: colors,
         }
     }
 
@@ -83,10 +83,11 @@ impl Runner {
         let mut selection_index: u16 = 0;
         let mut filtered_executables = self.executables.clone();
 
-        let background_color = color_from_hex(&self.colors.background_color).unwrap();
-        let background_color_active = color_from_hex(&self.colors.background_color_active).unwrap();
-        let font_color = color_from_hex(&self.colors.font_color).unwrap();
-        let font_color_active = color_from_hex(&self.colors.font_color_active).unwrap();
+        let background_color = color_from_hex(&self.settings.background_color).unwrap();
+        let background_color_active =
+            color_from_hex(&self.settings.background_color_active).unwrap();
+        let font_color = color_from_hex(&self.settings.font_color).unwrap();
+        let font_color_active = color_from_hex(&self.settings.font_color_active).unwrap();
 
         let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
 
@@ -210,9 +211,9 @@ impl Runner {
             // try to keep the selection centered
             let executables_len: u16 = filtered_executables.len() as u16;
             let start: u16 = selection_index
-                .saturating_sub(MAX_ITEM_DISPLAY_COUNT.div_euclid(2))
-                .min(executables_len.saturating_sub(MAX_ITEM_DISPLAY_COUNT));
-            let end: u16 = (start + MAX_ITEM_DISPLAY_COUNT).min(executables_len);
+                .saturating_sub(self.settings.rows.div_euclid(2))
+                .min(executables_len.saturating_sub(self.settings.rows));
+            let end: u16 = (start + self.settings.rows).min(executables_len);
             // ---
 
             let mut display_count: u16 = 0;
