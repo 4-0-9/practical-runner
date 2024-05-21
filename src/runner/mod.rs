@@ -12,7 +12,7 @@ use sdl2::{
 };
 
 use crate::{
-    config::{RunnerMenuSettings, FONT_POINT_SIZE, LINE_SPACING, PADDING},
+    config::{RunnerMenuSettings, LINE_SPACING, PADDING},
     utils::color_from_hex,
 };
 
@@ -39,7 +39,7 @@ impl Runner {
             let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
 
             let font = ttf
-                .load_font(font_path.clone(), FONT_POINT_SIZE)
+                .load_font(font_path.clone(), settings.font_size)
                 .expect(&format!("Error loading font {}", font_path));
 
             window_height =
@@ -92,7 +92,7 @@ impl Runner {
 
         let font = self
             .ttf
-            .load_font(font_path.clone(), FONT_POINT_SIZE)
+            .load_font(font_path.clone(), self.settings.font_size)
             .expect(&format!("Error loading font {}", font_path));
 
         let creator = self.canvas.texture_creator();

@@ -1,7 +1,7 @@
 use clap::Parser;
 
 use crate::config::{
-    BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, FONT_COLOR, FONT_COLOR_ACTIVE,
+    BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, FONT_COLOR, FONT_COLOR_ACTIVE, FONT_POINT_SIZE,
     MAX_ITEM_DISPLAY_COUNT,
 };
 
@@ -25,4 +25,7 @@ pub struct Arguments {
 
     #[arg(short, long, help = "The amount of items to display at once", default_value_t = MAX_ITEM_DISPLAY_COUNT)]
     pub rows: u16,
+
+    #[arg(long, help = "The menu's font size", default_value_t = FONT_POINT_SIZE)]
+    pub font_size: u16,
 }
