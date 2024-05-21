@@ -131,7 +131,6 @@ impl Runner {
                                     }
                                 }
                                 Keycode::Return => {
-                                    // TODO: Improve this
                                     let executables_len = filtered_executables.len();
                                     if executables_len > 0 {
                                         self.input = filtered_executables
