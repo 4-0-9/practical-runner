@@ -43,7 +43,9 @@ impl Runner {
                 .expect(&format!("Error loading font {}", font_path));
 
             window_height = (PADDING
-                + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows)) - settings.line_spacing + PADDING)
+                + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows))
+                - settings.line_spacing
+                + PADDING)
                 .into();
         }
 
@@ -196,7 +198,7 @@ impl Runner {
 
                 let rect = Rect::new(
                     PADDING.into(),
-                    (PADDING - 3).into(),
+                    (PADDING + self.settings.line_spacing.div_ceil(4)).into(),
                     surface.width(),
                     surface.height(),
                 );
@@ -216,10 +218,12 @@ impl Runner {
             let end: u16 = (start + self.settings.rows).min(executables_len);
             // ---
 
+            let half_line_spacing = self.settings.line_spacing.div_euclid(2);
+
             let mut display_count: u16 = 0;
 
             for i in start..end {
-                let offset = PADDING
+                let offset = PADDING * 2
                     + (font.height() as u16 + self.settings.line_spacing) * (display_count + 1);
 
                 let surface = font
@@ -238,8 +242,12 @@ impl Runner {
                     surface.height(),
                 );
 
-                let background_rect =
-                    Rect::new(0, offset.into(), self.window_size.0, surface.height());
+                let background_rect = Rect::new(
+                    0,
+                    (offset - half_line_spacing).into(),
+                    self.window_size.0,
+                    (surface.height() + self.settings.line_spacing as u32).into(),
+                );
 
                 self.canvas.set_draw_color(if i != selection_index {
                     background_color
