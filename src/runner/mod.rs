@@ -12,7 +12,7 @@ use sdl2::{
 };
 
 use crate::{
-    config::{RunnerMenuSettings, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT, PADDING},
+    config::{RunnerMenuSettings, FONT_POINT_SIZE, LINE_SPACING, PADDING},
     utils::color_from_hex,
 };
 
@@ -28,7 +28,7 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn new(prompt: String, executables: Vec<String>, colors: RunnerMenuSettings) -> Self {
+    pub fn new(prompt: String, executables: Vec<String>, settings: RunnerMenuSettings) -> Self {
         let context = sdl2::init().expect("Error creating SDL context");
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
@@ -42,9 +42,8 @@ impl Runner {
                 .load_font(font_path.clone(), FONT_POINT_SIZE)
                 .expect(&format!("Error loading font {}", font_path));
 
-            window_height = (PADDING
-                + ((font.height() as u16 + LINE_SPACING) * (1 + MAX_ITEM_DISPLAY_COUNT)))
-                .into();
+            window_height =
+                (PADDING + ((font.height() as u16 + LINE_SPACING) * (1 + settings.rows))).into();
         }
 
         let video = context.video().expect("Error initializing SDL video");
@@ -73,7 +72,7 @@ impl Runner {
             input: String::from(""),
             ttf,
             window_size,
-            settings: colors,
+            settings,
         }
     }
 
