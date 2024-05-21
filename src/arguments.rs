@@ -11,12 +11,12 @@ pub struct Arguments {
     #[arg(long, help = "The default font color", default_value_t = String::from(FONT_COLOR))]
     pub font_color: String,
 
-    #[arg(long, help = "The font color of the selected element", default_value_t = String::from(FONT_COLOR_ACTIVE))]
+    #[arg(long, help = "The font color of the active item", default_value_t = String::from(FONT_COLOR_ACTIVE))]
     pub font_color_active: String,
 
-    #[arg(long, help = "The default font color", default_value_t = String::from(BACKGROUND_COLOR))]
+    #[arg(long, help = "The default background color", default_value_t = String::from(BACKGROUND_COLOR))]
     pub background_color: String,
 
-    #[arg(long, help = "The font color of the selected element", default_value_t = String::from(BACKGROUND_COLOR_ACTIVE))]
+    #[arg(long, help = "The background color of the active item", default_value_t = String::from(BACKGROUND_COLOR_ACTIVE))]
     pub background_color_active: String,
 }
