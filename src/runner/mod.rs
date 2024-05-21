@@ -3,10 +3,10 @@ use std::time::Duration;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use sdl2::{
     event::Event,
-    keyboard::Keycode,
+    keyboard::{Keycode, Mod},
     rect::Rect,
     render::Canvas,
-    ttf::{self},
+    ttf,
     video::Window,
     Sdl,
 };
@@ -36,6 +36,7 @@ impl Runner {
         let ttf = ttf::init().expect("Error creating SDL TTF context");
 
         let window_height: u32;
+
         {
             let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
 
@@ -58,6 +59,7 @@ impl Runner {
             .expect("Error creating window");
 
         window.set_opacity(0.0).unwrap();
+
         let window_size = window.size();
 
         let canvas = window.into_canvas().build().expect("Error creating canvas");
@@ -109,6 +111,11 @@ impl Runner {
                     Event::Quit { .. }
                     | Event::KeyDown {
                         keycode: Some(Keycode::Escape),
+                        ..
+                    }
+                    | Event::KeyDown {
+                        keycode: Some(Keycode::C),
+                        keymod: Mod::LCTRLMOD,
                         ..
                     } => {
                         self.input = String::from("");
