@@ -1,3 +1,4 @@
+use core::panic;
 use std::time::Duration;
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
@@ -7,7 +8,7 @@ use sdl2::{
     rect::Rect,
     render::Canvas,
     ttf,
-    video::{DisplayMode, Window},
+    video::Window,
     Sdl,
 };
 
@@ -33,7 +34,8 @@ impl Runner {
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
 
-        let window_height: u32;
+        let (window_width, window_height): (u32, u32);
+        window_width = 480;
 
         {
             let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
@@ -51,17 +53,44 @@ impl Runner {
 
         let video = context.video().expect("Error initializing SDL video");
 
+        let (mut window_x, mut window_y): (i32, i32) = (0, 0);
+
+        match settings.display_index {
+            Some(display) => {
+                if (display as i32).lt(&video
+                    .num_video_displays()
+                    .expect("Error getting number of displays"))
+                {
+                    let bounds = video
+                        .display_bounds(display.into())
+                        .expect(&format!("Error getting bounds for display {}", display));
+
+                    window_x = bounds.x() + (bounds.width().div_euclid(2) as i32)
+                        - window_width.div_euclid(2) as i32;
+                    window_y = bounds.y() + (bounds.height().div_euclid(2) as i32)
+                        - window_height.div_euclid(2) as i32;
+                }
+            }
+            None => {}
+        }
+
         let window = video
-            .window("Practical runner", 480, window_height)
-            .position_centered()
+            .window("Practical runner", window_width, window_height)
             .borderless()
             .always_on_top()
             .build()
             .expect("Error creating window");
 
-        let window_size = window.size();
+        let mut canvas = window.into_canvas().build().expect("Error creating canvas");
 
-        let canvas = window.into_canvas().build().expect("Error creating canvas");
+        canvas.present();
+        if window_x.ne(&0) || window_y.ne(&0) {
+            canvas.window_mut().set_position(
+                sdl2::video::WindowPos::Positioned(window_x),
+                sdl2::video::WindowPos::Positioned(window_y),
+            );
+        }
+        canvas.window_mut().raise();
 
         let mut cloned_executables = executables.clone();
         cloned_executables.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
@@ -73,7 +102,7 @@ impl Runner {
             canvas,
             input: String::from(""),
             ttf,
-            window_size,
+            window_size: (window_width, window_height),
             settings,
         }
     }

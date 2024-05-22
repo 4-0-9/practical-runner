@@ -31,6 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             rows: args.rows,
             font_size: args.font_size,
             line_spacing: args.line_spacing,
+            display_index: args.display,
         },
     );
 

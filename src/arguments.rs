@@ -31,4 +31,7 @@ pub struct Arguments {
 
     #[arg(long, help = "The spacing between items", default_value_t = LINE_SPACING)]
     pub line_spacing: u16,
+
+    #[arg(short, long, help = "The index of the target display")]
+    pub display: Option<u8>,
 }
