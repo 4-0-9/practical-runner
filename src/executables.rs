@@ -3,7 +3,6 @@ use std::{error::Error, fs, path::Path};
 pub fn get_executables() -> Result<Vec<String>, Box<dyn Error>> {
     let mut executables: Vec<String> = Vec::new();
 
-    get_files(Path::new("/usr/local"), &mut executables)?;
     get_files(Path::new("/bin"), &mut executables)?;
     match home::cargo_home() {
         Ok(cargo_home) => {
