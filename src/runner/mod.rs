@@ -7,7 +7,7 @@ use sdl2::{
     rect::Rect,
     render::Canvas,
     ttf,
-    video::Window,
+    video::{DisplayMode, Window},
     Sdl,
 };
 
@@ -51,14 +51,13 @@ impl Runner {
 
         let video = context.video().expect("Error initializing SDL video");
 
-        let mut window = video
+        let window = video
             .window("Practical runner", 480, window_height)
             .position_centered()
             .borderless()
+            .always_on_top()
             .build()
             .expect("Error creating window");
-
-        window.set_opacity(0.0).unwrap();
 
         let window_size = window.size();
 
