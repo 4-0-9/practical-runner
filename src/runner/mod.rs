@@ -5,7 +5,7 @@ use sdl2::{
     event::Event,
     keyboard::{Keycode, Mod},
     rect::Rect,
-    render::Canvas,
+    render::{Canvas, WindowCanvas},
     ttf,
     video::Window,
     Sdl,
@@ -36,7 +36,7 @@ impl Runner {
 
         let font_path: String;
         let (window_width, window_height): (u32, u32);
-        window_width = 480;
+        window_width = 480 + (settings.border_size * 2) as u32;
 
         {
             font_path = get_font_path(match settings.font {
@@ -52,7 +52,8 @@ impl Runner {
             window_height = (PADDING
                 + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows))
                 - settings.line_spacing.div_euclid(2)
-                + PADDING)
+                + PADDING
+                + (settings.border_size * 2) as u16)
                 .into();
         }
 
@@ -125,6 +126,8 @@ impl Runner {
         let font_color = color_from_hex(&self.settings.font_color).unwrap();
         let font_color_active = color_from_hex(&self.settings.font_color_active).unwrap();
 
+        let border_color = color_from_hex(&self.settings.border_color).unwrap();
+
         let font = self
             .ttf
             .load_font(&self.font_path, self.settings.font_size)
@@ -137,6 +140,8 @@ impl Runner {
         'run: loop {
             self.canvas.set_draw_color(background_color);
             self.canvas.clear();
+            self.canvas.set_draw_color(border_color);
+            draw_borders(self.settings.border_size, self.window_size, &mut self.canvas);
 
             for event in event_pump.poll_iter() {
                 match event {
@@ -222,8 +227,10 @@ impl Runner {
                 }
             }
 
-            let mut cursor_offset_x = PADDING;
-            let input_position_y: u16 = (PADDING + self.settings.line_spacing.div_ceil(4)).into();
+            let mut cursor_offset_x = PADDING + self.settings.border_size as u16;
+            let input_position_y: u16 = (PADDING + self.settings.border_size as u16 - 1
+                + self.settings.line_spacing.div_ceil(4))
+            .into();
 
             if !self.input.is_empty() || !self.prompt.is_empty() {
                 let surface = font
@@ -232,7 +239,7 @@ impl Runner {
                     .expect("Error rendering text");
 
                 let rect = Rect::new(
-                    PADDING.into(),
+                    (PADDING + self.settings.border_size as u16).into(),
                     input_position_y.into(),
                     surface.width(),
                     surface.height(),
@@ -247,15 +254,17 @@ impl Runner {
                 let _ = self.canvas.copy(&texture, None, Some(rect));
             }
 
-            let cursor_rect = Rect::new(
-                cursor_offset_x.into(),
-                input_position_y.into(),
-                3,
-                font.height() as u32,
-            );
+            if self.canvas.window().has_input_focus() {
+                let cursor_rect = Rect::new(
+                    cursor_offset_x.into(),
+                    input_position_y.into(),
+                    3,
+                    font.height() as u32,
+                );
 
-            self.canvas.set_draw_color(background_color_active);
-            let _ = self.canvas.fill_rect(cursor_rect);
+                self.canvas.set_draw_color(background_color_active);
+                let _ = self.canvas.fill_rect(cursor_rect);
+            }
 
             // try to keep the selection centered
             let executables_len: u16 = filtered_executables.len() as u16;
@@ -270,7 +279,8 @@ impl Runner {
             let mut display_count: u16 = 0;
 
             for i in start..end {
-                let offset = PADDING * 2
+                let offset = self.settings.border_size as u16
+                    + PADDING * 2
                     + (font.height() as u16 + self.settings.line_spacing) * (display_count + 1);
 
                 let surface = font
@@ -283,16 +293,16 @@ impl Runner {
                     .expect("Error rendering text");
 
                 let rect = Rect::new(
-                    PADDING.into(),
+                    (self.settings.border_size as u16 + PADDING).into(),
                     offset.into(),
                     surface.width(),
                     surface.height(),
                 );
 
                 let background_rect = Rect::new(
-                    0,
+                    self.settings.border_size.into(),
                     (offset - half_line_spacing).into(),
-                    self.window_size.0,
+                    self.window_size.0 - (self.settings.border_size as u32) * 2,
                     (surface.height() + self.settings.line_spacing as u32).into(),
                 );
 
@@ -339,4 +349,23 @@ fn filter_executables(
         .collect();
 
     filtered_executables.sort_by(|a, b| b.starts_with(input).cmp(&a.starts_with(input)));
+}
+
+fn draw_borders(border_size: u8, window_size: (u32, u32), canvas: &mut WindowCanvas) {
+    if border_size > 0 {
+        let _ = canvas.fill_rect(Rect::new(0, 0, window_size.0, border_size.into()));
+        let _ = canvas.fill_rect(Rect::new(
+            (window_size.0 - border_size as u32) as i32,
+            0,
+            border_size.into(),
+            window_size.1,
+        ));
+        let _ = canvas.fill_rect(Rect::new(
+            0,
+            (window_size.1 - border_size as u32) as i32,
+            window_size.0,
+            border_size.into(),
+        ));
+        let _ = canvas.fill_rect(Rect::new(0, 0, border_size.into(), window_size.1));
+    }
 }

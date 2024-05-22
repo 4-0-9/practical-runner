@@ -27,6 +27,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             font: args.font,
             font_color: args.font_color,
             font_color_active: args.font_color_active,
+            border_color: args.border_color,
+            border_size: args.border_size,
             background_color: args.background_color,
             background_color_active: args.background_color_active,
             rows: args.rows,

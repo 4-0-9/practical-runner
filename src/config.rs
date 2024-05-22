@@ -9,9 +9,14 @@ pub const FONT_COLOR_ACTIVE: &str = "#1e1e2e";
 pub const BACKGROUND_COLOR: &str = "#1e1e2e";
 pub const BACKGROUND_COLOR_ACTIVE: &str = "#89b4fa";
 
+pub const BORDER_SIZE: u8 = 1;
+pub const BORDER_COLOR: &str = "#585b70";
+
 pub struct RunnerMenuSettings {
     pub font_color: String,
     pub font_color_active: String,
+    pub border_color: String,
+    pub border_size: u8,
     pub background_color: String,
     pub background_color_active: String,
     pub rows: u16,

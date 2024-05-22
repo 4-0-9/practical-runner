@@ -1,8 +1,8 @@
 use clap::Parser;
 
 use crate::config::{
-    BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, FONT_COLOR, FONT_COLOR_ACTIVE, FONT_POINT_SIZE,
-    LINE_SPACING, MAX_ITEM_DISPLAY_COUNT,
+    BACKGROUND_COLOR, BACKGROUND_COLOR_ACTIVE, BORDER_COLOR, BORDER_SIZE, FONT_COLOR,
+    FONT_COLOR_ACTIVE, FONT_POINT_SIZE, LINE_SPACING, MAX_ITEM_DISPLAY_COUNT,
 };
 
 #[derive(Parser, Debug)]
@@ -19,6 +19,12 @@ pub struct Arguments {
 
     #[arg(long, help = "The font color of the active item", default_value_t = String::from(FONT_COLOR_ACTIVE))]
     pub font_color_active: String,
+
+    #[arg(long, help = "The window border color", default_value_t = String::from(BORDER_COLOR))]
+    pub border_color: String,
+
+    #[arg(long, help = "The window border size in pixels", default_value_t = BORDER_SIZE)]
+    pub border_size: u8,
 
     #[arg(long, help = "The default background color", default_value_t = String::from(BACKGROUND_COLOR))]
     pub background_color: String,
