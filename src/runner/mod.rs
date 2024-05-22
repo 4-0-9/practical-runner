@@ -13,7 +13,7 @@ use sdl2::{
 
 use crate::{
     config::{RunnerMenuSettings, PADDING},
-    utils::color_from_hex,
+    utils::{color_from_hex, get_font_path},
 };
 
 pub struct Runner {
@@ -22,6 +22,7 @@ pub struct Runner {
     context: Sdl,
     canvas: Canvas<Window>,
     ttf: ttf::Sdl2TtfContext,
+    font_path: String,
     input: String,
     window_size: (u32, u32),
     settings: RunnerMenuSettings,
@@ -33,15 +34,20 @@ impl Runner {
 
         let ttf = ttf::init().expect("Error creating SDL TTF context");
 
+        let font_path: String;
         let (window_width, window_height): (u32, u32);
         window_width = 480;
 
         {
-            let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
+            font_path = get_font_path(match settings.font {
+                Some(ref font_p) => font_p.clone(),
+                None => String::from("Monospace"),
+            })
+            .expect("Could not load fonts");
 
             let font = ttf
-                .load_font(font_path.clone(), settings.font_size)
-                .expect(&format!("Error loading font {}", font_path));
+                .load_font(&font_path, settings.font_size)
+                .expect(&format!("Error loading font {}", &font_path));
 
             window_height = (PADDING
                 + ((font.height() as u16 + settings.line_spacing) * (1 + settings.rows))
@@ -103,6 +109,7 @@ impl Runner {
             ttf,
             window_size: (window_width, window_height),
             settings,
+            font_path,
         }
     }
 
@@ -118,12 +125,10 @@ impl Runner {
         let font_color = color_from_hex(&self.settings.font_color).unwrap();
         let font_color_active = color_from_hex(&self.settings.font_color_active).unwrap();
 
-        let font_path = String::from("/usr/share/fonts/OTF/GeistMonoNerdFontMono-Regular.otf");
-
         let font = self
             .ttf
-            .load_font(font_path.clone(), self.settings.font_size)
-            .expect(&format!("Error loading font {}", font_path));
+            .load_font(&self.font_path, self.settings.font_size)
+            .expect(&format!("Error loading font {}", self.font_path));
 
         let creator = self.canvas.texture_creator();
 

@@ -11,6 +11,9 @@ pub struct Arguments {
     #[arg(short, long, help = "The menu's prompt message", default_value_t = String::from(""))]
     pub prompt: String,
 
+    #[arg(long, help = "The font to use for the menu.")]
+    pub font: Option<String>,
+
     #[arg(long, help = "The default font color", default_value_t = String::from(FONT_COLOR))]
     pub font_color: String,
 

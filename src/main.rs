@@ -24,6 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         args.prompt,
         executables,
         RunnerMenuSettings {
+            font: args.font,
             font_color: args.font_color,
             font_color_active: args.font_color_active,
             background_color: args.background_color,

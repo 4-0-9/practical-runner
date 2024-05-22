@@ -18,4 +18,5 @@ pub struct RunnerMenuSettings {
     pub font_size: u16,
     pub line_spacing: u16,
     pub display_index: Option<u8>,
+    pub font: Option<String>,
 }
