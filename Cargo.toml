@@ -4,6 +4,10 @@ description = "A practical application runner"
 version = "0.1.0"
 authors = ["409"]
 edition = "2021"
+license = "MIT"
+homepage = "https://github.com/4-0-9/practical-runner"
+repository = "https://github.com/4-0-9/practical-runner"
+readme = "README.md"
 
 [profile.release]
 opt-level = "z"
