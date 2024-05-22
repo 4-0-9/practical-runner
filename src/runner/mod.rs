@@ -141,7 +141,11 @@ impl Runner {
             self.canvas.set_draw_color(background_color);
             self.canvas.clear();
             self.canvas.set_draw_color(border_color);
-            draw_borders(self.settings.border_size, self.window_size, &mut self.canvas);
+            draw_borders(
+                self.settings.border_size,
+                self.window_size,
+                &mut self.canvas,
+            );
 
             for event in event_pump.poll_iter() {
                 match event {
