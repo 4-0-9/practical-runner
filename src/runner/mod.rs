@@ -1,4 +1,3 @@
-use core::panic;
 use std::time::Duration;
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
@@ -218,6 +217,9 @@ impl Runner {
                 }
             }
 
+            let mut cursor_offset_x = PADDING;
+            let input_position_y: u16 = (PADDING + self.settings.line_spacing.div_ceil(4)).into();
+
             if !self.input.is_empty() || !self.prompt.is_empty() {
                 let surface = font
                     .render(&format!("{}{}", &self.prompt, &self.input))
@@ -226,10 +228,12 @@ impl Runner {
 
                 let rect = Rect::new(
                     PADDING.into(),
-                    (PADDING + self.settings.line_spacing.div_ceil(4)).into(),
+                    input_position_y.into(),
                     surface.width(),
                     surface.height(),
                 );
+
+                cursor_offset_x += surface.width() as u16;
 
                 let texture = creator
                     .create_texture_from_surface(surface)
@@ -237,6 +241,16 @@ impl Runner {
 
                 let _ = self.canvas.copy(&texture, None, Some(rect));
             }
+
+            let cursor_rect = Rect::new(
+                cursor_offset_x.into(),
+                input_position_y.into(),
+                3,
+                font.height() as u32,
+            );
+
+            self.canvas.set_draw_color(background_color_active);
+            let _ = self.canvas.fill_rect(cursor_rect);
 
             // try to keep the selection centered
             let executables_len: u16 = filtered_executables.len() as u16;
