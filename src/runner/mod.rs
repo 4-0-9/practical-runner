@@ -26,6 +26,7 @@ pub struct Runner {
     input: String,
     window_size: (u32, u32),
     settings: RunnerMenuSettings,
+    target_display_index: Option<i32>,
 }
 
 impl Runner {
@@ -83,6 +84,7 @@ impl Runner {
         let window = video
             .window("Practical runner", window_width, window_height)
             .borderless()
+            .position_centered()
             .always_on_top()
             .build()
             .expect("Error creating window");
@@ -90,12 +92,32 @@ impl Runner {
         let mut canvas = window.into_canvas().build().expect("Error creating canvas");
 
         canvas.present();
+
+        // If we don't call this before window.display_index() it always returns 0
+        let _ = context
+            .event_pump()
+            .expect("Error getting SDL event pump")
+            .poll_iter()
+            .count();
+
+        let target_display_index = if settings.display_index.is_some() {
+            Some(
+                canvas
+                    .window()
+                    .display_index()
+                    .expect("Error getting window display index"),
+            )
+        } else {
+            None
+        };
+
         if window_x.ne(&0) || window_y.ne(&0) {
             canvas.window_mut().set_position(
                 sdl2::video::WindowPos::Positioned(window_x),
                 sdl2::video::WindowPos::Positioned(window_y),
             );
         }
+
         canvas.window_mut().raise();
 
         let mut cloned_executables = executables.clone();
@@ -111,6 +133,7 @@ impl Runner {
             window_size: (window_width, window_height),
             settings,
             font_path,
+            target_display_index,
         }
     }
 
@@ -329,12 +352,33 @@ impl Runner {
 
             self.canvas.present();
 
-            std::thread::sleep(Duration::from_millis(8))
+            std::thread::sleep(Duration::from_millis(8));
         }
 
         if self.input.is_empty() {
             None
         } else {
+            match self.target_display_index {
+                Some(target_display_index) => {
+                    let window = self.canvas.window_mut();
+                    let target_display_bounds = self
+                        .context
+                        .video()
+                        .expect("Error getting SDL video")
+                        .display_bounds(target_display_index)
+                        .expect("Error getting target display bounds");
+
+                    window.set_position(
+                        sdl2::video::WindowPos::Positioned(target_display_bounds.x()),
+                        sdl2::video::WindowPos::Positioned(target_display_bounds.y()),
+                    );
+
+                    window.raise();
+                    window.hide();
+                }
+                None => (),
+            }
+
             Some(self.input.clone())
         }
     }
