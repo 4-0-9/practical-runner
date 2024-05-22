@@ -9,5 +9,6 @@ A practical application runner written in Rust. Inspired by [dmenu](https://tool
 ### Features
 - theming (colors, font family, font size, line spacing, window border)
 - custom row count
+- smart row scrolling
 - prompt message
 - open menu on a specific display
