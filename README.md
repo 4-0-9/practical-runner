@@ -18,7 +18,11 @@ A practical application runner written in Rust. Inspired by [dmenu](https://tool
 
 
 ### Installation
-To use practical-runner clone this repository and run the following command in the repository's root directory.
+To use practical-runner run the following command:
+```console
+cargo install practicalrunner
+```
+Or clone this repository and run the following command in the repository's root directory:
 ```console
 cargo install --path .
 ```
