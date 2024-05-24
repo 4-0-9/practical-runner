@@ -8,7 +8,7 @@ use sdl2::{
     render::{Canvas, WindowCanvas},
     ttf,
     video::Window,
-    Sdl,
+    Sdl, VideoSubsystem,
 };
 
 use crate::{
@@ -60,32 +60,11 @@ impl Runner {
 
         let video = context.video().expect("Error initializing SDL video");
 
-        let (mut window_x, mut window_y): (i32, i32) = (0, 0);
-
-        match settings.display_index {
-            Some(display) => {
-                if (display as i32).lt(&video
-                    .num_video_displays()
-                    .expect("Error getting number of displays"))
-                {
-                    let bounds = video
-                        .display_bounds(display.into())
-                        .expect(&format!("Error getting bounds for display {}", display));
-
-                    window_x = bounds.x() + (bounds.width().div_euclid(2) as i32)
-                        - window_width.div_euclid(2) as i32;
-                    window_y = bounds.y() + (bounds.height().div_euclid(2) as i32)
-                        - window_height.div_euclid(2) as i32;
-                }
-            }
-            None => {}
-        }
-
         let window = video
             .window("Practical runner", window_width, window_height)
             .borderless()
-            .position_centered()
             .always_on_top()
+            .set_shaped()
             .build()
             .expect("Error creating window");
 
@@ -100,22 +79,22 @@ impl Runner {
             .poll_iter()
             .count();
 
-        let target_display_index = if settings.display_index.is_some() {
-            Some(
-                canvas
-                    .window()
-                    .display_index()
-                    .expect("Error getting window display index"),
-            )
-        } else {
-            None
-        };
+        let target_display_index: Option<i32>;
 
-        if window_x.ne(&0) || window_y.ne(&0) {
-            canvas.window_mut().set_position(
-                sdl2::video::WindowPos::Positioned(window_x),
-                sdl2::video::WindowPos::Positioned(window_y),
-            );
+        let current_display_index = canvas
+            .window()
+            .display_index()
+            .expect("Error getting window display index");
+
+        match settings.display_index {
+            Some(display_index) => {
+                target_display_index = Some(current_display_index);
+                center_on_display(canvas.window_mut(), display_index.into(), &video);
+            }
+            None => {
+                target_display_index = None;
+                center_on_display(canvas.window_mut(), current_display_index.into(), &video);
+            }
         }
 
         canvas.window_mut().raise();
@@ -415,5 +394,30 @@ fn draw_borders(border_size: u8, window_size: (u32, u32), canvas: &mut WindowCan
             border_size.into(),
         ));
         let _ = canvas.fill_rect(Rect::new(0, 0, border_size.into(), window_size.1));
+    }
+}
+
+fn center_on_display(window: &mut Window, display_index: i32, video: &VideoSubsystem) {
+    if (display_index as i32).lt(&video
+        .num_video_displays()
+        .expect("Error getting number of displays"))
+    {
+        let bounds = video.display_bounds(display_index.into()).expect(&format!(
+            "Error getting bounds for display {}",
+            display_index
+        ));
+
+        let window_size = window.size();
+
+        window.set_position(
+            sdl2::video::WindowPos::Positioned(
+                bounds.x() + bounds.width().div_euclid(2) as i32
+                    - window_size.0.div_euclid(2) as i32,
+            ),
+            sdl2::video::WindowPos::Positioned(
+                bounds.y() + bounds.height().div_euclid(2) as i32
+                    - window_size.1.div_euclid(2) as i32,
+            ),
+        );
     }
 }
