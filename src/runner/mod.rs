@@ -140,6 +140,11 @@ impl Runner {
         let mut event_pump = self.context.event_pump().unwrap();
 
         'run: loop {
+            if !self.canvas.window().has_input_focus() {
+                self.input.clear();
+                break 'run;
+            }
+
             self.canvas.set_draw_color(background_color);
             self.canvas.clear();
             self.canvas.set_draw_color(border_color);
